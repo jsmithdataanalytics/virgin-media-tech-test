@@ -1,2 +1,2 @@
-# virgin-media-tech-test
-My solution to the Virgin Media data engineering technical test
+# Virgin Media Tech Test
+My solution to the Virgin Media Data Engineer tech test.

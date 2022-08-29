@@ -32,7 +32,7 @@ with Pipeline() as pipeline:
         | 'sum transaction amounts by date'
         >> CombinePerKey(sum)
         | 'reformat as json objects'
-        >> MapTuple(lambda date, amount: json.dumps({'date': date, 'total_amount': amount}))
+        >> MapTuple(lambda date, amount: json.dumps({'date': date, 'total_amount': '{:.2f}'.format(amount)}))
         | 'write output file'
         >> WriteToText(
             file_path_prefix='output/results',

@@ -21,7 +21,7 @@ class SumQualifyingTransactionsByDate(PTransform):
             | 'sum transaction amounts by date'
             >> CombinePerKey(sum)
             | 'reformat as json objects'
-            >> MapTuple(lambda date, amount: json.dumps({'date': date, 'total_amount': amount}))
+            >> MapTuple(lambda date, amount: json.dumps({'date': date, 'total_amount': '{:.2f}'.format(amount)}))
         )
 
 

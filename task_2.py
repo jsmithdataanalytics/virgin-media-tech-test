@@ -12,8 +12,6 @@ class SumQualifyingTransactionsByDate(PTransform):
     def expand(self, pcoll):
         return (
             pcoll
-            | 'drop header line'
-            >> Filter(lambda line: not line.startswith('timestamp'))
             | 'get date and amount'
             >> Map(parse_csv_line)
             | 'filter for transaction_amount greater than 20 and timestamp in or after 2010'
@@ -25,11 +23,16 @@ class SumQualifyingTransactionsByDate(PTransform):
         )
 
 
-with Pipeline() as pipeline:
+def create_pipeline() -> Pipeline:
+    pipeline = Pipeline()
+
     (
         pipeline
         | 'read input file lines'
-        >> ReadFromText(file_pattern='gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv')
+        >> ReadFromText(
+            file_pattern='gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv',
+            skip_header_lines=1,
+        )
         | 'transform into json output'
         >> SumQualifyingTransactionsByDate()
         | 'write output file'
@@ -41,3 +44,9 @@ with Pipeline() as pipeline:
             shard_name_template='',
         )
     )
+
+    return pipeline
+
+
+if __name__ == '__main__':
+    create_pipeline().run().wait_until_finish()

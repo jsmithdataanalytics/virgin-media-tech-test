@@ -18,7 +18,6 @@ class SumQualifyingTransactionsByDateTest(unittest.TestCase):
         """
 
         lines = [
-            'timestamp,origin,destination,transaction_amount',
             '2017-01-01 04:22:23 UTC,wallet00000e719adfeaa64b5a,wallet00001866cb7e0f09a890,100.00',
             '2017-01-01 05:22:23 UTC,wallet00000e719adfeaa64b5a,wallet00001e494c12b3083634,200.00',
             '2017-01-01 06:22:23 UTC,wallet00001866cb7e0f09a890,wallet00001e494c12b3083634,300.00',

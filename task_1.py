@@ -17,14 +17,17 @@ def parse_csv_line(line: str) -> Tuple[str, float]:
     return str(utc_date), transaction_amount
 
 
-with Pipeline() as pipeline:
+def create_pipeline() -> Pipeline:
+    pipeline = Pipeline()
+
     # noinspection PyTypeChecker
     (
         pipeline
         | 'read input file lines'
-        >> ReadFromText(file_pattern='gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv')
-        | 'drop header line'
-        >> Filter(lambda line: not line.startswith('timestamp'))
+        >> ReadFromText(
+            file_pattern='gs://cloud-samples-data/bigquery/sample-transactions/transactions.csv',
+            skip_header_lines=1,
+        )
         | 'get date and amount'
         >> Map(parse_csv_line)
         | 'filter for transaction_amount greater than 20 and timestamp in or after 2010'
@@ -42,3 +45,9 @@ with Pipeline() as pipeline:
             shard_name_template='',
         )
     )
+
+    return pipeline
+
+
+if __name__ == '__main__':
+    create_pipeline().run().wait_until_finish()

@@ -2,7 +2,7 @@ import json
 from typing import Tuple
 
 import pytz
-from apache_beam import Pipeline, Filter, Map, MapTuple, GroupByKey
+from apache_beam import Pipeline, Filter, Map, MapTuple, CombinePerKey
 from apache_beam.io import ReadFromText, WriteToText
 from dateutil.parser import parse as parse_timestamp
 
@@ -18,6 +18,7 @@ def parse_csv_line(line: str) -> Tuple[str, float]:
 
 
 with Pipeline() as pipeline:
+    # noinspection PyTypeChecker
     (
         pipeline
         | 'read input file lines'
@@ -26,17 +27,13 @@ with Pipeline() as pipeline:
         >> Filter(lambda line: not line.startswith('timestamp'))
         | 'get date and amount'
         >> Map(parse_csv_line)
-        | 'filter for transaction_amount greater than 20'
-        >> Filter(lambda item: item[1] > 20)
-        | 'exclude timestamps before 2010'
-        >> Filter(lambda item: item[0] >= '2010-01-01')
-        | 'group transaction amounts by date'
-        >> GroupByKey()
+        | 'filter for transaction_amount greater than 20 and timestamp in or after 2010'
+        >> Filter(lambda item: item[0] >= '2010-01-01' and item[1] > 20)
         | 'sum transaction amounts by date'
-        >> MapTuple(lambda date, amount: (date, sum(amount)))
+        >> CombinePerKey(sum)
         | 'reformat as json objects'
         >> MapTuple(lambda date, amount: json.dumps({'date': date, 'total_amount': amount}))
-        | 'create output file'
+        | 'write output file'
         >> WriteToText(
             file_path_prefix='output/results',
             file_name_suffix='.jsonl.gz',
